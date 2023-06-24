@@ -1,0 +1,11 @@
+---
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: 07671c5
+_src_path: ./
+description: Litestar project example 🌠
+docs: true
+docsurl: https://quickplates.github.io/litestar-example
+email: quickplates@mail.spietras.dev
+importname: litestar_example
+projectname: litestar-example
+username: quickplates
