@@ -1,0 +1,40 @@
+[tool.poetry]
+name = "litestar-example"
+version = "0.1.0"
+description = "Litestar project example 🌠"
+license = "MIT"
+authors = ["quickplates <quickplates@mail.spietras.dev>"]
+readme = "README.md"
+repository = "https://github.com/quickplates/litestar-example"
+documentation = "https://quickplates.github.io/litestar-example"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+# Pydantic is used to define data models
+pydantic = { version = "^1.10", extras = ["dotenv"] }
+# OmegaConf is used to load configuration
+omegaconf = "^2.3"
+# Typer and Rich are used to build CLIs
+typer = { version = "^0.9", extras = ["all"] }
+rich = "^13.4"
+# Litestar and Uvicorn are used to build async APIs
+litestar = "^2.0.0b1"
+uvicorn = { version = "^0.22", extras = ["standard"] }
+# pyhumps is used to convert between different case styles
+pyhumps = "^3.8"
+
+[tool.poetry.group.test.dependencies]
+pytest = "^7"
+pytest-asyncio = "^0.21"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+
+[tool.poetry.scripts]
+# Register CLI
+litestar-example = "litestar_example.__main__:cli"
+
+# See: https://python-poetry.org/docs/pyproject/#poetry-and-pep-517
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
