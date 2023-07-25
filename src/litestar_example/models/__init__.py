@@ -1,0 +1,1 @@
+from litestar_example.models.base import SerializableModel as SerializableModel
