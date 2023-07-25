@@ -1,0 +1,31 @@
+import uvicorn
+from litestar import Litestar
+
+from litestar_example.config import Config
+
+
+class Server:
+    """Server for the application.
+
+    Args:
+        app: The application.
+        config: The configuration for the application.
+    """
+
+    def __init__(self, app: Litestar, config: Config) -> None:
+        self._app = app
+        self._config = config
+
+    def run(self) -> None:
+        """Run the server."""
+
+        config = self._config.server
+
+        uvicorn.run(
+            self._app,
+            host=config.host,
+            port=config.port,
+            limit_concurrency=config.concurrency,
+            backlog=config.backlog,
+            timeout_keep_alive=config.keepalive,
+        )
