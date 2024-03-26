@@ -1,0 +1,15 @@
+# Dependencies
+/node_modules/
+
+# Build
+/build/
+
+# Generated files
+/.docusaurus/
+
+# Misc
+.DS_Store
+npm-debug.log*
+
+# Test
+/.tmp/
