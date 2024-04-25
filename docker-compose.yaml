@@ -1,0 +1,9 @@
+services:
+  litestar-example:
+    build:
+      context: ./
+      network: host
+    environment:
+      - "LITESTAR_EXAMPLE__SERVER__HOST=${LITESTAR_EXAMPLE__SERVER__HOST:-0.0.0.0}"
+      - "LITESTAR_EXAMPLE__SERVER__PORT=${LITESTAR_EXAMPLE__SERVER__PORT:-8080}"
+    network_mode: host
