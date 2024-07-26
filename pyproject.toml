@@ -1,0 +1,37 @@
+[tool.poetry]
+name = "litestar-example"
+version = "0.1.0"
+description = "Litestar app example 🌠"
+authors = ["quickplates <quickplates@mail.spietras.dev>"]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+# Pydantic is used to define data models
+pydantic = "^2.8"
+pydantic-settings = "^2.3"
+# OmegaConf is used to load configuration
+omegaconf = "^2.3"
+# Typer and Rich are used to build CLIs
+typer = "^0.12"
+rich = "^13.7"
+# Litestar and Uvicorn are used to build async APIs
+litestar = "^2.10"
+uvicorn = { version = "^0.30", extras = ["standard"] }
+# For correct handling of timezones
+tzdata = "*"
+
+[tool.poetry.group.test.dependencies]
+pytest = "^8.3"
+# Asyncio support for pytest
+pytest-asyncio = "^0.23"
+# Running dependent services in containers
+testcontainers = "^4.7"
+
+[tool.poetry.scripts]
+# Register CLI
+litestar-example = "litestar_example.__main__:cli"
+
+# See: https://python-poetry.org/docs/pyproject/#poetry-and-pep-517
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
