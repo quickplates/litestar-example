@@ -1,0 +1,90 @@
+version: 0.1
+cli:
+  version: 1.22.2
+plugins:
+  sources:
+    - id: trunk
+      ref: v1.6.1
+      uri: https://github.com/trunk-io/plugins
+runtimes:
+  enabled:
+    # Needed for gitleaks, shfmt
+    - go@1.22.1
+    # Needed for eslint, markdownlint, prettier, svgo
+    - node@21.7.1
+    # Needed for black, ruff, yamllint
+    - python@3.12.2
+lint:
+  ignore:
+    - linters: [ALL]
+      paths:
+        # Ignore copier answers file
+        - "**/.copier-answers.yaml"
+  definitions:
+    # Nix formatting check (local)
+    - name: nix-fmt-check
+      files: [nix]
+      commands:
+        - output: pass_fail
+          read_output_from: stderr
+          run: >-
+            nix
+            --accept-flake-config
+            --extra-experimental-features
+            'nix-command flakes'
+            --no-warn-dirty
+            fmt
+            --
+            --check
+            ${target}
+          success_codes: [0, 1]
+    # Nix flake check (local)
+    - name: nix-flake-check
+      files: [nix]
+      commands:
+        - output: pass_fail
+          target: ./
+          read_output_from: stderr
+          run: >-
+            nix
+            --accept-flake-config
+            --extra-experimental-features
+            'nix-command flakes'
+            --no-warn-dirty
+            flake
+            check
+            path:${target}
+          success_codes: [0, 1]
+  enabled:
+    # GitHub Actions linting
+    - actionlint@1.6.27
+    # Python formatting
+    - black@24.4.2
+    # JavaScript linting
+    - eslint@8.57.0
+    # Check for whitespace errors
+    - git-diff-check
+    # Check for secrets in the code
+    - gitleaks@8.18.2
+    # Dockerfile linting
+    - hadolint@2.12.0
+    # Markdown linting
+    - markdownlint@0.39.0
+    # Nix formatting check
+    - nix-fmt-check@SYSTEM
+    # Nix flake check
+    - nix-flake-check@SYSTEM
+    # JS, JSON, YAML, Markdown formatting
+    - prettier@3.0.2
+    # Python linting
+    - ruff@0.5.5
+    # Shell linting
+    - shellcheck@0.10.0
+    # Shell formatting
+    - shfmt@3.8.0
+    # SVG formatting
+    - svgo@3.2.0
+    # TOML formatting
+    - taplo@0.8.1
+    # YAML linting
+    - yamllint@1.35.1
