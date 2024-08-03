@@ -1,0 +1,19 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: 662fbd3
+_src_path: ./
+accountname: quickplates
+appname: litestar-example
+description: Litestar app example 🌠
+docs: true
+docsurl: https://quickplates.github.io/litestar-example
+email: quickplates@mail.spietras.dev
+envprefix: LITESTAR_EXAMPLE
+events: true
+imagename: apps/litestar-example
+importname: litestar_example
+port: 8080
+registry: true
+releases: true
+reponame: litestar-example
+repourl: https://github.com/quickplates/litestar-example
+sse: true
