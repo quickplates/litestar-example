@@ -1,0 +1,8 @@
+{
+  // Set default Python interpreter to the one in the virtual environment
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv",
+  // Don't activate the virtual environment by VS Code
+  "python.terminal.activateEnvironment": false,
+  // Enable pytest for testing
+  "python.testing.pytestEnabled": true
+}

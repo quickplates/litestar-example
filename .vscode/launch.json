@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "litestar-example",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "litestar_example",
+      "justMyCode": false,
+      "envFile": ".env.python"
+    }
+  ]
+}
