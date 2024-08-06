@@ -1,0 +1,28 @@
+# Local development environment overrides
+/local.nix
+
+#Task
+/.task/
+/Taskfile.yaml
+/Taskfile.yml
+
+# Misc
+.DS_Store
+.todo
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Pytest
+.pytest_cache/
+
+# Environment
+/.venv/
+
+# Environment variables
+.env
