@@ -1,0 +1,65 @@
+name: Image
+
+# Put 'on' in quotes to avoid YAML parsing error
+"on":
+  # Enable manual triggering
+  workflow_dispatch: {}
+  # Run on commits to main branch
+  push:
+    branches:
+      - main
+    # Run only on changes to relevant files
+    paths:
+      - .github/workflows/image.yaml
+      - scripts/**
+      - src/**
+      - .dockerignore
+      - .env.python
+      - Dockerfile
+      - flake.lock
+      - "*.nix"
+      - poetry.lock
+      - poetry.toml
+      - pyproject.toml
+  # Run also on pull requests to main branch
+  pull_request:
+    branches:
+      - main
+    # Run only on changes to relevant files
+    paths:
+      - .github/workflows/image.yaml
+      - scripts/**
+      - src/**
+      - .dockerignore
+      - .env.python
+      - Dockerfile
+      - flake.lock
+      - "*.nix"
+      - poetry.lock
+      - poetry.toml
+      - pyproject.toml
+
+jobs:
+  image:
+    name: Build Docker image
+    # Pin version of Ubuntu to avoid breaking changes
+    runs-on: ubuntu-22.04
+    # Use reasonable timeout to avoid stuck workflows
+    timeout-minutes: 30
+    permissions:
+      # Needed to checkout code
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.1.1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3.1.0
+      - name: Build Docker image
+        uses: docker/build-push-action@v5.2.0
+        with:
+          context: ./
+          # Don't save image
+          outputs: type=cacheonly
+          # Cache Docker layers between builds
+          cache-from: type=gha,scope=${{ github.workflow }}
+          cache-to: type=gha,mode=max,scope=${{ github.workflow }}
