@@ -1,0 +1,100 @@
+name: Test
+
+# Put 'on' in quotes to avoid YAML parsing error
+"on":
+  # Enable manual triggering
+  workflow_dispatch: {}
+  # Run on commits to main branch
+  push:
+    branches:
+      - main
+    # Run only on changes to relevant files
+    paths:
+      - .github/workflows/test.yaml
+      - src/**
+      - tests/**
+      - .env.python
+      - flake.lock
+      - "*.nix"
+      - poetry.lock
+      - poetry.toml
+      - pyproject.toml
+      - Taskfile.dist.yaml
+  # Run also on pull requests to main branch
+  pull_request:
+    branches:
+      - main
+    # Run only on changes to relevant files
+    paths:
+      - .github/workflows/test.yaml
+      - src/**
+      - tests/**
+      - .env.python
+      - flake.lock
+      - "*.nix"
+      - poetry.lock
+      - poetry.toml
+      - pyproject.toml
+      - Taskfile.dist.yaml
+
+jobs:
+  test:
+    name: Test
+    # Pin version of Ubuntu to avoid breaking changes
+    runs-on: ubuntu-22.04
+    # Use reasonable timeout to avoid stuck workflows
+    timeout-minutes: 30
+    env:
+      NIX_CACHE_DIR: /home/runner/.nixcache/
+      POETRY_CACHE_DIR: /home/runner/.poetrycache/
+    permissions:
+      # Needed to checkout code
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.1.1
+      - name: Setup Nix cache
+        uses: actions/cache@v4.0.1
+        id: cache-nix
+        with:
+          path: ${{ env.NIX_CACHE_DIR }}
+          key: test-nix
+      - name: Setup Poetry cache
+        uses: actions/cache@v4.0.1
+        with:
+          path: ${{ env.POETRY_CACHE_DIR }}
+          key: test-poetry
+      - name: Install Nix
+        uses: cachix/install-nix-action@v26
+        with:
+          github_access_token: ${{ github.token }}
+          install_url: https://releases.nixos.org/nix/nix-2.20.5/install
+      # See: https://github.com/cachix/install-nix-action/issues/56
+      - name: Import Nix store cache
+        if: steps.cache-nix.outputs.cache-hit == 'true'
+        run: >
+          nix-store
+          --import
+          < ${{ env.NIX_CACHE_DIR }}/archive.nar
+      - name: Run tests
+        env:
+          POETRY_CACHE_DIR: ${{ env.POETRY_CACHE_DIR }}
+        run: >
+          nix
+          develop
+          ./#test
+          --command
+          --
+          task
+          test
+      # See: https://github.com/cachix/install-nix-action/issues/56
+      - name: Export Nix store cache
+        if: "!cancelled()"
+        run: >
+          mkdir
+          --parents
+          ${{ env.NIX_CACHE_DIR }}
+          &&
+          nix-store
+          --export $(find /nix/store/ -maxdepth 1 -name '*-*')
+          > ${{ env.NIX_CACHE_DIR }}/archive.nar
