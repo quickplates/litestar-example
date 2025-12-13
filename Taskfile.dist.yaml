@@ -1,0 +1,189 @@
+version: "3.43"
+
+tasks:
+  template:
+    desc: Fetch template updates
+    interactive: true
+    env:
+      GIT_CONFIG_GLOBAL: ""
+      GIT_CONFIG_SYSTEM: ""
+    cmds:
+      - >-
+        copier
+        update
+        --answers-file
+        .copier-answers.yaml
+        {{ .CLI_ARGS }}
+  flake:
+    desc: Update flake.lock
+    cmds:
+      - >-
+        nix
+        --accept-flake-config
+        --extra-experimental-features
+        'nix-command flakes'
+        --no-warn-dirty
+        flake
+        update
+        {{ .CLI_ARGS }}
+  fmt:
+    desc: Format files
+    cmds:
+      - task: install-docs-internal
+        vars:
+          CLI_ARGS: ""
+      - >-
+        trunk
+        fmt
+        {{ .CLI_ARGS }}
+  lint:
+    desc: Lint files
+    cmds:
+      - task: install-internal
+        vars:
+          CLI_ARGS: ""
+      - task: install-docs-internal
+        vars:
+          CLI_ARGS: ""
+      - >-
+        trunk
+        check
+        {{ .CLI_ARGS }}
+  install-docs:
+    desc: Install docs dependencies
+    dir: docs/
+    sources:
+      - package-lock.json
+      - package.json
+      - ../flake.lock
+      - ../*.nix
+      - ../Taskfile.dist.yaml
+      - ../{taskfile,Taskfile}.{yaml,yml}
+    generates:
+      - node_modules/**/*
+    cmds:
+      - >-
+        npm
+        install
+        {{ .CLI_ARGS }}
+  install-docs-internal:
+    desc: Install docs dependencies quietly
+    internal: true
+    dir: docs/
+    cmds:
+      - task: install-docs
+        vars:
+          CLI_ARGS: >-
+            --prefer-offline
+            --no-audit
+            --no-fund
+            --quiet
+            --no-progress
+  update-docs:
+    desc: Update docs package-lock.json
+    dir: docs/
+    cmds:
+      - >-
+        npm
+        update
+        {{ .CLI_ARGS }}
+  docs:
+    desc: Run docusaurus
+    dir: docs/
+    interactive: true
+    cmds:
+      - task: install-docs-internal
+        vars:
+          CLI_ARGS: ""
+      - >-
+        npm
+        exec
+        --
+        docusaurus
+        {{ .CLI_ARGS | default "start --host 0.0.0.0" }}
+  clean:
+    desc: Clean virtualenv
+    cmds:
+      - >-
+        rm
+        --recursive
+        --force
+        {{ .CLI_ARGS }}
+        .venv/
+    status:
+      - >-
+        test
+        '!'
+        -d
+        .venv/
+  install:
+    desc: Install dependencies
+    sources:
+      - flake.lock
+      - "*.nix"
+      - pyproject.toml
+      - Taskfile.dist.yaml
+      - "{taskfile,Taskfile}.{yaml,yml}"
+      - uv.lock
+    generates:
+      - .venv/**/*
+    cmds:
+      - >-
+        uv
+        sync
+        {{ .CLI_ARGS }}
+  install-internal:
+    desc: Install dependencies quietly
+    internal: true
+    cmds:
+      - task: install
+        vars:
+          CLI_ARGS: >-
+            --quiet
+  update:
+    desc: Update uv.lock
+    cmds:
+      - >-
+        uv
+        lock
+        --upgrade
+        {{ .CLI_ARGS }}
+  bump:
+    desc: Bump version
+    cmds:
+      - >-
+        uv
+        version
+        --bump
+        {{ .CLI_ARGS | default "minor" }}
+  test:
+    desc: Run tests
+    cmds:
+      - >-
+        uv
+        run
+        --
+        pytest
+        {{ .CLI_ARGS }}
+  run:
+    desc: Run the service
+    interactive: true
+    cmds:
+      - >-
+        uv
+        run
+        --
+        litestar-example
+        {{ .CLI_ARGS }}
+  docker:
+    desc: Run in docker container
+    interactive: true
+    cmds:
+      - >-
+        docker
+        compose
+        up
+        --build
+        --force-recreate
+        --remove-orphans
+        {{ .CLI_ARGS }}

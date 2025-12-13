@@ -1,0 +1,12 @@
+{
+  "configurations": [
+    {
+      "justMyCode": false,
+      "module": "litestar_example",
+      "name": "litestar-example",
+      "request": "launch",
+      "type": "debugpy"
+    }
+  ],
+  "version": "0.2.0"
+}
