@@ -1,0 +1,54 @@
+from litestar import Controller as BaseController
+from litestar import handlers
+from litestar.channels import ChannelsPlugin
+from litestar.di import Provide
+from litestar.openapi import ResponseSpec
+from litestar.response import ServerSentEvent
+from litestar.status_codes import HTTP_200_OK
+
+from litestar_example.api.routes.sse import models as m
+from litestar_example.api.routes.sse.service import Service
+from litestar_example.services.events.service import EventsService
+
+
+class DependenciesBuilder:
+    """Builder for the dependencies of the controller."""
+
+    async def _build_service(self, channels: ChannelsPlugin) -> Service:
+        return Service(
+            events=EventsService(
+                channels=channels,
+            ),
+        )
+
+    def build(self) -> dict[str, Provide]:
+        """Build the dependencies."""
+        return {
+            "service": Provide(self._build_service),
+        }
+
+
+class Controller(BaseController):
+    """Controller for the sse endpoint."""
+
+    dependencies = DependenciesBuilder().build()
+
+    @handlers.get(
+        summary="Get SSE stream",
+        status_code=HTTP_200_OK,
+        responses={
+            HTTP_200_OK: ResponseSpec(
+                str,
+                description="Stream of Server-Sent Events.",
+                media_type="text/event-stream",
+                generate_examples=False,
+            )
+        },
+    )
+    async def subscribe(self, service: Service) -> ServerSentEvent:
+        """Get a stream of Server-Sent Events."""
+        req = m.SubscribeRequest()
+
+        res = await service.subscribe(req)
+
+        return ServerSentEvent(res.messages)
