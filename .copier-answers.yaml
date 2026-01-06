@@ -1,0 +1,16 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: 80ee566
+_src_path: ./
+accountname: quickplates
+description: Litestar service example 🌠
+docs: true
+docsurl: https://quickplates.github.io/litestar-example
+envprefix: LITESTAR_EXAMPLE
+imagename: services/litestar-example
+importname: litestar_example
+port: 8080
+registry: true
+releases: true
+reponame: litestar-example
+repourl: https://github.com/quickplates/litestar-example
+servicename: litestar-example
