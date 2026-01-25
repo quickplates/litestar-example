@@ -1,0 +1,14 @@
+# Dependencies
+/node_modules/
+
+# Build
+/build/
+
+# Debug
+*.log
+
+# Typescript
+*.tsbuildinfo
+
+# Docusaurus
+/.docusaurus/
