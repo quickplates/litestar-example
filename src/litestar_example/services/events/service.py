@@ -1,0 +1,25 @@
+from collections.abc import AsyncGenerator
+
+from litestar.channels import ChannelsPlugin
+
+from litestar_example.models.base import Serializable
+from litestar_example.models.events.event import Event
+from litestar_example.services.events import models as m
+
+
+class EventsService:
+    """Service for events."""
+
+    def __init__(self, channels: ChannelsPlugin) -> None:
+        self._channels = channels
+
+    async def _subscribe(self) -> AsyncGenerator[Event]:
+        subscription = self._channels.start_subscription("events")
+
+        async with subscription as subscriber:
+            async for event in subscriber.iter_events():
+                yield Serializable[Event].model_validate_json(event).root
+
+    async def subscribe(self, request: m.SubscribeRequest) -> m.SubscribeResponse:
+        """Subscribe to app events."""
+        return m.SubscribeResponse(events=self._subscribe())
