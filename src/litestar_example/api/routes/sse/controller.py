@@ -1,0 +1,94 @@
+from collections.abc import Mapping
+from dataclasses import dataclass
+from typing import Annotated
+
+from litestar import Controller as BaseController
+from litestar import handlers
+from litestar.channels import ChannelsPlugin
+from litestar.datastructures import ResponseHeader
+from litestar.di import Provide
+from litestar.openapi.spec import OpenAPIResponse, OpenAPIType, Operation, Schema
+from litestar.params import Parameter
+from litestar.response import ServerSentEvent, ServerSentEventMessage
+from litestar.status_codes import HTTP_200_OK
+
+from litestar_example.api.routes.sse import models as m
+from litestar_example.api.routes.sse.service import Service
+from litestar_example.models.base import Jsonable
+from litestar_example.services.events.service import EventsService
+
+
+@dataclass
+class SubscribeOperation(Operation):
+    """OpenAPI Operation for getting a stream of Server-Sent Events."""
+
+    def __post_init__(self) -> None:
+        if (
+            self.responses
+            and str(HTTP_200_OK) in self.responses
+            and (response := self.responses[str(HTTP_200_OK)])
+            and isinstance(response, OpenAPIResponse)
+            and (content := response.content)
+            and "text/event-stream" in content
+            and (schema := content["text/event-stream"].schema)
+            and isinstance(schema, Schema)
+        ):
+            schema.type = OpenAPIType.STRING
+
+
+class DependenciesBuilder:
+    """Builder for the dependencies of the controller."""
+
+    async def _build_service(self, channels: ChannelsPlugin) -> Service:
+        return Service(events=EventsService(channels=channels))
+
+    def build(self) -> Mapping[str, Provide]:
+        """Build the dependencies."""
+        return {
+            "service": Provide(self._build_service),
+        }
+
+
+class Controller(BaseController):
+    """Controller for the sse endpoint."""
+
+    dependencies = DependenciesBuilder().build()
+
+    @handlers.get(
+        summary="Get SSE stream",
+        status_code=HTTP_200_OK,
+        response_description="Request fulfilled, stream of Server-Sent Events follows",
+        response_headers=[
+            ResponseHeader(
+                name="Cache-Control",
+                value="no-cache",
+                required=True,
+            ),
+            ResponseHeader(
+                name="Connection",
+                value="keep-alive",
+                required=True,
+            ),
+        ],
+        media_type="text/event-stream",
+        operation_class=SubscribeOperation,
+    )
+    async def subscribe(
+        self,
+        service: Service,
+        types: Annotated[
+            Jsonable[m.SubscribeRequestTypes] | None,
+            Parameter(
+                description="Types of events to subscribe to.",
+            ),
+        ] = None,
+    ) -> ServerSentEvent:
+        """Get a stream of Server-Sent Events."""
+        request = m.SubscribeRequest(types=types.root if types else None)
+
+        response = await service.subscribe(request)
+
+        return ServerSentEvent(
+            ServerSentEventMessage(data=message.event.model_dump_json(round_trip=True))
+            async for message in response.messages
+        )

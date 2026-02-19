@@ -1,0 +1,34 @@
+from litestar.channels import ChannelsPlugin
+
+from litestar_example.models.events import test as ev
+from litestar_example.models.events.types import Event
+from litestar_example.services.test import errors as e
+from litestar_example.services.test import models as m
+
+
+class TestService:
+    """Service for tests."""
+
+    def __init__(self, channels: ChannelsPlugin) -> None:
+        self._channels = channels
+
+    @property
+    def limit(self) -> int:
+        """Maximum length for the message."""
+        return 10
+
+    def _emit_event(self, event: Event) -> None:
+        data = event.model_dump_json(round_trip=True)
+        self._channels.publish(data, "events")
+
+    def _emit_test_event(self, message: str) -> None:
+        self._emit_event(ev.TestEvent(data=ev.TestEventData(message=message)))
+
+    async def test(self, request: m.TestRequest) -> m.TestResponse:
+        """Test."""
+        if len(request.message) > self.limit:
+            raise e.MessageTooLongError(request.message, self.limit)
+
+        self._emit_test_event(request.message)
+
+        return m.TestResponse(message=request.message)
