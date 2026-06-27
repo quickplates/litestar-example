@@ -1,0 +1,64 @@
+from collections.abc import Mapping
+
+from litestar import Controller as BaseController
+from litestar import handlers
+from litestar.datastructures import ResponseHeader
+from litestar.di import Provide
+from litestar.status_codes import HTTP_204_NO_CONTENT
+
+from litestar_example.api.routes.ping import models as m
+from litestar_example.api.routes.ping.service import Service
+from litestar_example.services.ping.service import PingService
+
+
+class DependenciesBuilder:
+    """Builder for the dependencies of the controller."""
+
+    async def _build_service(self) -> Service:
+        return Service(ping=PingService())
+
+    def build(self) -> Mapping[str, Provide]:
+        """Build the dependencies."""
+        return {
+            "service": Provide(self._build_service),
+        }
+
+
+class Controller(BaseController):
+    """Controller for the ping endpoint."""
+
+    dependencies = DependenciesBuilder().build()
+
+    @handlers.get(
+        summary="Ping",
+        status_code=HTTP_204_NO_CONTENT,
+        response_headers=[
+            ResponseHeader(
+                name="Cache-Control",
+                value="no-store",
+                required=True,
+            ),
+        ],
+    )
+    async def ping(self, service: Service) -> None:
+        """Ping."""
+        request = m.PingRequest()
+
+        await service.ping(request)
+
+    @handlers.head(
+        summary="Ping headers",
+        status_code=HTTP_204_NO_CONTENT,
+        response_headers=[
+            ResponseHeader(
+                name="Cache-Control",
+                value="no-store",
+                required=True,
+            ),
+        ],
+    )
+    async def headping(self, service: Service) -> None:
+        """Ping headers."""
+        request = m.HeadPingRequest()
+
+        await service.headping(request)

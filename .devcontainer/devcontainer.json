@@ -1,0 +1,71 @@
+{
+  "build": {
+    "context": "image/",
+    "dockerfile": "image/Dockerfile",
+    "options": ["--network=host"]
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "jnoortheen.nix-ide",
+        "mkhl.direnv",
+        "ms-python.python",
+        "tamasfe.even-better-toml",
+        "task.vscode-task",
+        "Trunk.io"
+      ],
+      "settings": {
+        "[nix]": {
+          "editor.defaultFormatter": "jnoortheen.nix-ide"
+        },
+        "editor.defaultFormatter": "trunk.io",
+        "nix.enableLanguageServer": true,
+        "nix.serverPath": "nil",
+        "nix.serverSettings": {
+          "nil": {
+            "formatting": {
+              "command": ["nix", "fmt", "--", "-"]
+            }
+          }
+        },
+        "python.analysis.nodeExecutable": "auto",
+        "remote.autoForwardPorts": false
+      }
+    }
+  },
+  "features": {
+    "ghcr.io/devcontainers-extra/features/direnv:1.0.3": {
+      "version": "2.37.1"
+    },
+    "ghcr.io/devcontainers-extra/features/starship:1.0.10": {
+      "version": "1.24.0"
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2.12.4": {
+      "version": "28.5.1"
+    },
+    "ghcr.io/devcontainers/features/nix:1.2.0": {
+      "extraNixConfig": "experimental-features = nix-command flakes",
+      "version": "2.28.5"
+    }
+  },
+  "mounts": [
+    "source=devcontainer-shared-secrets,target=/secrets/,type=volume",
+    "source=devcontainer-${devcontainerId}-nix,target=/nix/,type=volume",
+    "source=devcontainer-${devcontainerId}-shellhistory-persist,target=/persist/shellhistory/,type=volume",
+    "source=devcontainer-shared-trunk-cache,target=/cache/trunk/,type=volume",
+    "source=devcontainer-shared-uv-cache,target=/cache/uv/,type=volume",
+    "source=devcontainer-shared-npm-cache,target=/cache/npm/,type=volume"
+  ],
+  "onCreateCommand": "/hooks/create.sh",
+  "remoteEnv": {
+    "WORKSPACE": "${containerWorkspaceFolder}"
+  },
+  "runArgs": [
+    "--uts=host",
+    "--ipc=host",
+    "--network=host",
+    "--userns=host",
+    "--cgroupns=host",
+    "--privileged"
+  ]
+}

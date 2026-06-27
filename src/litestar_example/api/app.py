@@ -1,0 +1,61 @@
+from collections.abc import Callable, Sequence
+from contextlib import AbstractAsyncContextManager
+
+from litestar import Litestar
+from litestar.channels import ChannelsPlugin
+from litestar.channels.backends.memory import MemoryChannelsBackend
+from litestar.openapi import OpenAPIConfig
+from litestar.plugins import PluginProtocol
+
+from litestar_example.api.lifespans import TestLifespan
+from litestar_example.api.openapi import OpenAPIConfigBuilder
+from litestar_example.api.plugins.pydantic import PydanticPlugin
+from litestar_example.api.routes.router import router
+from litestar_example.config.models import Config
+from litestar_example.state import State
+
+
+class AppBuilder:
+    """Builds the app.
+
+    Args:
+        config: Config object.
+
+    """
+
+    def __init__(self, config: Config) -> None:
+        self._config = config
+
+    def _build_lifespan(
+        self,
+    ) -> Sequence[Callable[[Litestar], AbstractAsyncContextManager]]:
+        return [
+            TestLifespan,
+        ]
+
+    def _build_openapi_config(self) -> OpenAPIConfig:
+        return OpenAPIConfigBuilder().build()
+
+    def _build_plugins(self) -> Sequence[PluginProtocol]:
+        return [
+            ChannelsPlugin(backend=MemoryChannelsBackend(), channels=["events"]),
+            PydanticPlugin(),
+        ]
+
+    def _build_initial_state(self) -> State:
+        return State(
+            {
+                "config": self._config,
+            }
+        )
+
+    def build(self) -> Litestar:
+        """Build the app."""
+        return Litestar(
+            route_handlers=[router],
+            debug=self._config.debug,
+            lifespan=self._build_lifespan(),
+            openapi_config=self._build_openapi_config(),
+            plugins=self._build_plugins(),
+            state=self._build_initial_state(),
+        )
