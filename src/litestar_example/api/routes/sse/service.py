@@ -1,0 +1,37 @@
+from collections.abc import AsyncGenerator, Generator
+from contextlib import contextmanager
+
+from litestar_example.api.routes.sse import errors as e
+from litestar_example.api.routes.sse import models as m
+from litestar_example.services.events import errors as ee
+from litestar_example.services.events import models as em
+from litestar_example.services.events.service import EventsService
+
+
+class Service:
+    """Service for the sse endpoint."""
+
+    def __init__(self, events: EventsService) -> None:
+        self._events = events
+
+    @contextmanager
+    def _handle_errors(self) -> Generator[None]:
+        try:
+            yield
+        except ee.ServiceError as ex:
+            raise e.ServiceError from ex
+
+    async def _subscribe(
+        self, types: m.SubscribeRequestTypes
+    ) -> AsyncGenerator[m.EventMessage]:
+        subscribe_request = em.SubscribeRequest(types=types)
+
+        with self._handle_errors():
+            subscribe_response = await self._events.subscribe(subscribe_request)
+
+            async for event in subscribe_response.events:
+                yield m.EventMessage(event=event)
+
+    async def subscribe(self, request: m.SubscribeRequest) -> m.SubscribeResponse:
+        """Subscribe to event messages."""
+        return m.SubscribeResponse(messages=self._subscribe(request.types))
