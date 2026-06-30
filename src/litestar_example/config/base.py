@@ -1,0 +1,42 @@
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class BaseConfig(BaseSettings):
+    """Base configuration class."""
+
+    model_config = SettingsConfigDict(
+        # Disallow non-serializable float values
+        allow_inf_nan=False,
+        # Allow coercion of numbers to strings
+        coerce_numbers_to_str=True,
+        # Load environment variables from this file if it exists
+        env_file=".env",
+        # Use this delimiter to separate nested models
+        env_nested_delimiter="__",
+        # Treat empty strings as None
+        env_parse_none_str="",
+        # Use this prefix for all environment variables
+        env_prefix="LITESTAR_EXAMPLE__",
+        # Ignore extra fields
+        extra="ignore",
+        # Make the instance immutable
+        frozen=True,
+        # Make fields with default values required in serialization schemas
+        json_schema_serialization_defaults_required=True,
+        # Allow partial updates to nested models
+        nested_model_default_partial_update=True,
+        # Serialize aliased fields by their alias
+        serialize_by_alias=True,
+        # Preserve empty paths in URLs
+        url_preserve_empty_path=True,
+        # Use field docstrings as descriptions
+        use_attribute_docstrings=True,
+        # Allow populating aliased fields by their original name
+        validate_by_name=True,
+        # Validate default values
+        validate_default=True,
+        # Validate return values from callable validators
+        validate_return=True,
+        # Attach underlying exceptions as cause for validation errors
+        validation_error_cause=True,
+    )
