@@ -1,0 +1,17 @@
+from litestar_example.models.base import datamodel
+
+
+@datamodel
+class TestRequest:
+    """Request to test."""
+
+    message: str
+    """Input message."""
+
+
+@datamodel
+class TestResponse:
+    """Response for test."""
+
+    message: str
+    """Output message."""
