@@ -1,0 +1,21 @@
+from litestar_example.models.base import datamodel
+
+
+@datamodel
+class PingRequest:
+    """Request to ping."""
+
+
+@datamodel
+class PingResponse:
+    """Response for ping."""
+
+
+@datamodel
+class HeadPingRequest:
+    """Request to ping headers."""
+
+
+@datamodel
+class HeadPingResponse:
+    """Response for ping headers."""

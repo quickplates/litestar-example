@@ -1,0 +1,57 @@
+[project]
+name = "litestar-example"
+version = "0.1.0"
+classifiers = ["Private :: Do Not Upload"]
+
+requires-python = "~= 3.14.0"
+dependencies = [
+  # Main API framework
+  "litestar ~= 2.24.0",
+  # Defining data models
+  "pydantic ~= 2.13.0",
+  # Loading configuration
+  "pydantic-settings ~= 2.15.0",
+  # Pretty-printing in the terminal
+  "rich ~= 15.0.0",
+  # Building CLIs
+  "typer ~= 0.27.0",
+  # Timezone data
+  "tzdata",
+  # ASGI server
+  "uvicorn[standard] ~= 0.54.0",
+]
+
+[dependency-groups]
+dev = [
+  # Template management
+  "copier ~= 9.15.0",
+  # Testing framework
+  "pytest ~= 9.1.0",
+  # Asyncio support for pytest
+  "pytest-asyncio ~= 1.4.0",
+  # Containers interface for testing
+  "testcontainers ~= 4.15.0",
+]
+
+[project.scripts]
+litestar-example = "litestar_example.__main__:cli"
+
+[build-system]
+requires = ["uv_build ~= 0.11.0"]
+build-backend = "uv_build"
+
+[tool.pyright]
+# Analyze code only in these directories
+include = ["src/", "tests/"]
+
+# Specify the path to the virtual environment
+venv = ".venv"
+venvPath = "./"
+
+# Python version and platform to target
+pythonPlatform = "All"
+pythonVersion = "3.14"
+
+[tool.pytest.ini_options]
+# Remove in the future: https://github.com/pytest-dev/pytest-asyncio/issues/924
+asyncio_default_fixture_loop_scope = "function"

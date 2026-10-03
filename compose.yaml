@@ -1,0 +1,6 @@
+services:
+  litestar-example:
+    build:
+      context: ./
+      network: host
+    network_mode: host
