@@ -1,0 +1,8 @@
+# Mark everything as vendored
+* linguist-vendored
+# Treat docs as documentation
+/docs/** -linguist-vendored linguist-documentation
+# Unmark files in src, so that they are included in language stats
+/src/** -linguist-vendored
+# Treat tests as documentation
+/tests/** -linguist-vendored linguist-documentation
